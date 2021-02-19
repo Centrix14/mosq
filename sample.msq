@@ -1,0 +1,7 @@
+print "Simple MOSQ programm";
+
+def my-macro[] [
+	print
+];
+
+my-macro "Simple MOSQ macro";
