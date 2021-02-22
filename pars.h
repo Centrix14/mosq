@@ -11,11 +11,17 @@ typedef struct {
 
 char *pl_alloc_buf(int len);
 void pl_free_buf(pl_state *ps);
+
 void pl_open_file(char *filename);
 void pl_pars_stream(FILE *stream, pl_state *ps);
 void pl_pars_char(pl_state *ps);
+
 void pl_check_str(pl_state *ps);
 void pl_check_space(pl_state *ps);
+void pl_check_delimetrs(pl_state *ps);
 void pl_check_symbol(pl_state *ps);
+
+void pl_show_token(pl_state *ps);
+void pl_add_token(pl_state *ps);
 
 #endif
