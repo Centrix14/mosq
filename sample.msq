@@ -1,7 +1,7 @@
 print "Simple MOSQ programm";
 
-def my-macro[] [
-	print
-];
+my-macro print
+@my-macro "Simple MOSQ macro";
 
-my-macro "Simple MOSQ macro";
+my-proc [print "It is my procedure!"]
+@my-proc;
