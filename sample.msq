@@ -1,7 +1,3 @@
-print "Simple MOSQ programm";
+print ["Hello, everyone!" .n "It is MOSQ!"];
 
-my-macro print
-@my-macro "Simple MOSQ macro";
-
-my-proc [print "It is my procedure!"]
-@my-proc;
+help;
