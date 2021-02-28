@@ -39,3 +39,19 @@ void lb_show_list() {
 		lptr = lptr->next;
 	}
 }
+
+void lb_crawl(void (*func)(list*)) {
+	list *lptr;
+
+	lptr = programm;
+	while (lptr) {
+		if (lptr->data)
+			(*func)(lptr);
+
+		lptr = lptr->next;
+	}
+}
+
+void lb_print_node(list *node) {
+	printf("%s\n", (char*)node->data);
+}
