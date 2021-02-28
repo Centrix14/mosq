@@ -6,12 +6,12 @@
 #include "st.h/st.h"
 #include "pars.h"
 #include "list_builder.h"
+#include "interp.h"
 
 int main() {
 	lb_init();
 
 	pl_open_file("sample.msq");
-	lb_show_list();
 
 	lb_free();
 	return 0;
@@ -95,6 +95,11 @@ void pl_check_delimetrs(pl_state *ps) {
 		ps->buffer[ps->i++] = 0;
 
 		pl_add_token(ps);
+
+		lb_crawl(il_eval);
+		lb_free();
+		lb_init();
+
 		ps->c = 0;
 	}
 	else if (strchr("[]", ps->c)) {
