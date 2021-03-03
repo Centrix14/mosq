@@ -30,7 +30,7 @@ int il_is_std_func(char *tok) {
 		if (!strcmp(std_func_list[i], tok))
 			return i;
 	return -1;
-} 
+}
 
 void il_eval_as_func(char *tok, list *node) {
 	int res = -1;
