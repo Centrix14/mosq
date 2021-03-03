@@ -11,7 +11,7 @@
 int main() {
 	lb_init();
 
-	pl_open_file("sample.msq");
+	pl_open_file("code.msq");
 
 	lb_free();
 	return 0;
@@ -95,6 +95,7 @@ void pl_check_delimetrs(pl_state *ps) {
 		ps->buffer[ps->i++] = 0;
 
 		pl_add_token(ps);
+		lb_show_list();
 
 		lb_crawl(il_eval);
 		lb_free();
