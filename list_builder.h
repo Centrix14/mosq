@@ -14,4 +14,8 @@ void lb_crawl(void (*func)(list*));
 
 void lb_print_node(list *node);
 
+char *lb_eval_addr(char *addr, list *node);
+
+int lb_is_addr_expr(char *expr);
+
 #endif
