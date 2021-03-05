@@ -95,9 +95,9 @@ void pl_check_delimetrs(pl_state *ps) {
 		ps->buffer[ps->i++] = 0;
 
 		pl_add_token(ps);
-		lb_show_list();
 
 		lb_crawl(il_eval);
+		//lb_show_list();
 		lb_free();
 		lb_init();
 
