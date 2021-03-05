@@ -5,8 +5,8 @@
 #include "list_builder.h"
 #include "interp.h"
 
-char *std_func_list[] = {"print", "help", NULL};
-void (*std_cb_list[])(list*) = {il_cb_print, il_cb_help};
+char *std_func_list[] = {"print", "help", "reval", NULL};
+void (*std_cb_list[])(list*) = {il_cb_print, il_cb_help, il_cb_reval};
 
 void il_eval(list *node) {
 	static int is_block = 0; 
@@ -45,7 +45,7 @@ void il_run(int code, list *node) {
 }
 
 int __il_is_esc_seq(char *str) {
-	char *esc[] = {".n", ".t", NULL};
+	char *esc[] = {".n", ".t", ".p", NULL};
 
 	for (int i = 0; esc[i]; i++)
 		if (!strcmp(esc[i], str))
@@ -56,6 +56,8 @@ int __il_is_esc_seq(char *str) {
 void __il_print_esc(char *str) {
 	if (!strcmp(str, ".n"))
 		putc('\n', stdout);
+	else if (!strcmp(str, ".p"))
+		lb_show_list();
 	else
 		putc('\t', stdout);
 }
@@ -92,12 +94,20 @@ void il_cb_print(list *node) {
 	if (arg && arg->data)
 		str = (char*)arg->data;
 
-	if (strcmp(str, "[")) // str != [
-		printf("%s", str);
+	if (strcmp(str, "[")) { // str != [
+		if (__il_is_esc_seq(str) > -1)
+			__il_print_esc(str);
+		else
+			printf("%s", str);
+	}
 	else
 		__il_print_list(arg->next);
 }
 
 void il_cb_help(list *node) {
 	printf("\n\tIt\'s MI - MOSQ Interpreter v0.1\n\t22.02.2021 by Centrix\n\n");
+}
+
+void il_cb_reval(list *node) {
+	lb_crawl(il_eval);
 }
