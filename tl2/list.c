@@ -15,7 +15,6 @@ list *list_init_node(list *parent) {
 	nptr->prev = parent;
 	nptr->next = NULL;
 	nptr->data = NULL;
-	nptr->dt = OT_FIGURE;
 
 	return nptr;
 }
