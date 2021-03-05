@@ -11,8 +11,6 @@ typedef struct __list__ {
 	struct __list__ *next;
 
 	void *data;
-
-	OBJ_TYPE dt; // data type
 } list;
 
 list *list_init_node(list *parent);
