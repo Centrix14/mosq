@@ -11,5 +11,6 @@ int il_is_std_func(char *tok);
 
 void il_cb_print(list *node);
 void il_cb_help(list *node);
+void il_cb_reval(list *node);
 
 #endif
