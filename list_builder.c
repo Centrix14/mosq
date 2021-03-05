@@ -6,6 +6,7 @@
 #include "list_builder.h"
 
 list *programm = NULL;
+list *target_node = NULL;
 
 void lb_init() {
 	programm = list_init_node(NULL);
@@ -20,8 +21,15 @@ void lb_add_token(pl_state *ps) {
 	list *last;
 
 	data = ps->buffer;
-	if (lb_is_addr_expr(data))
+	if (lb_is_addr_expr(data)) {
 		data = lb_eval_addr(data, programm);
+
+		if (!strcmp("[", data)) {
+			lb_add_block(ps);
+
+			return ;
+		}
+	}
 
 	list_add_node(programm);
 
@@ -29,6 +37,7 @@ void lb_add_token(pl_state *ps) {
 	
 	node_buf = pl_alloc_buf(strlen(data) + 1);
 	strcpy(node_buf, data);
+
 	list_set_data(last, node_buf);
 }
 
@@ -38,7 +47,9 @@ void lb_show_list() {
 
 	lptr = programm;
 	while (lptr) {
-		printf("[%3d]: %s\n", i++, (char*)lptr->data);
+		//printf("[%3d]: %s\n", i++, (char*)lptr->data);
+		if (lptr->data)
+			printf("%s ", (char*)lptr->data);
 
 		lptr = lptr->next;
 	}
@@ -113,7 +124,32 @@ char *lb_eval_addr(char *addr, list *node) {
 		tok = strtok(NULL, ":");
 	}
 
-	if (lptr && lptr->data)
+	if (lptr && lptr->data) {
+		target_node = lptr;
+
 		return lptr->data;
+	}
 	return NULL;
+}
+
+void lb_add_block(pl_state *ps) {
+	char *data = NULL, *node_buf = NULL;
+	list *lptr = NULL, *last = NULL;
+	int brackets = 0;
+
+	lptr = target_node->next;
+	data = (char*)lptr->data;
+	while (strcmp(data, "]")) { // data != ]
+		list_add_node(programm);
+
+		last = list_get_last(programm);
+
+		node_buf = pl_alloc_buf(strlen((char*)lptr->data) + 1);
+		strcpy(node_buf, lptr->data);
+
+		list_set_data(last, node_buf);
+
+		lptr = lptr->next;
+		data = (lptr) ? (lptr->data) : NULL;
+	}
 }
