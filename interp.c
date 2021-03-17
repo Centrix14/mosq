@@ -15,6 +15,9 @@ void il_eval(list *node) {
 	data = (char*)node->data;
 	if (il_is_block(data))
 		is_block = !is_block;
+
+	if (!strcmp(data, "&"))
+		lb_insert_in_list(node, "new-tok");
 	else if (!is_block)
 		il_eval_as_func(data, node);
 }
