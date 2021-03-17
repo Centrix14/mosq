@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "tl2/list.h"
@@ -21,7 +22,7 @@ void lb_add_token(pl_state *ps) {
 	list *last;
 
 	data = ps->buffer;
-	if (lb_is_addr_expr(data)) {
+	/*if (lb_is_addr_expr(data)) {
 		data = lb_eval_addr(data, programm);
 
 		if (!strcmp("[", data)) {
@@ -29,7 +30,7 @@ void lb_add_token(pl_state *ps) {
 
 			return ;
 		}
-	}
+	}*/
 
 	list_add_node(programm);
 
@@ -152,4 +153,17 @@ void lb_add_block(pl_state *ps) {
 		lptr = lptr->next;
 		data = (lptr) ? (lptr->data) : NULL;
 	}
+}
+
+void lb_insert_in_list(list *lptr, char *str) {
+	list *new = NULL;
+
+	new = list_init_node(lptr);
+	
+	new->next = lptr->next;
+	lptr->next = new;
+	lptr->next->prev = new;
+
+	new->data = malloc(strlen(str) + 1);
+	strcpy(new->data, str);
 }
