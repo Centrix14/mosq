@@ -20,4 +20,6 @@ char *lb_eval_addr(char *addr, list *node);
 
 int lb_is_addr_expr(char *expr);
 
+void lb_insert_in_list(list *lptr, char *str);
+
 #endif
