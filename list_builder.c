@@ -22,16 +22,6 @@ void lb_add_token(pl_state *ps) {
 	list *last;
 
 	data = ps->buffer;
-	/*if (lb_is_addr_expr(data)) {
-		data = lb_eval_addr(data, programm);
-
-		if (!strcmp("[", data)) {
-			lb_add_block(ps);
-
-			return ;
-		}
-	}*/
-
 	list_add_node(programm);
 
 	last = list_get_last(programm);
@@ -48,8 +38,8 @@ void lb_show_list() {
 
 	lptr = programm;
 	while (lptr) {
-		//printf("[%3d]: %s\n", i++, (char*)lptr->data);
 		if (lptr->data)
+			//printf("[%3d]: %s\n", i++, (char*)lptr->data);
 			printf("%s ", (char*)lptr->data);
 
 		lptr = lptr->next;
@@ -133,14 +123,14 @@ char *lb_eval_addr(char *addr, list *node) {
 	return NULL;
 }
 
-void lb_add_block(pl_state *ps) {
+/*void lb_add_block(pl_state *ps) {
 	char *data = NULL, *node_buf = NULL;
 	list *lptr = NULL, *last = NULL;
 	int brackets = 0;
 
 	lptr = target_node->next;
 	data = (char*)lptr->data;
-	while (strcmp(data, "]")) { // data != ]
+	while (data && strcmp(data, "]")) { // data != ]
 		list_add_node(programm);
 
 		last = list_get_last(programm);
@@ -149,11 +139,16 @@ void lb_add_block(pl_state *ps) {
 		strcpy(node_buf, lptr->data);
 
 		list_set_data(last, node_buf);
+		if (!strcmp(data, "["))
+			brackets++;
+		if ((strcmp(data, "[")) || (brackets > 1)) {
+			
+		} 
 
 		lptr = lptr->next;
 		data = (lptr) ? (lptr->data) : NULL;
 	}
-}
+}*/
 
 void lb_insert_in_list(list *lptr, char *str) {
 	list *new = NULL;
@@ -166,4 +161,54 @@ void lb_insert_in_list(list *lptr, char *str) {
 
 	new->data = malloc(strlen(str) + 1);
 	strcpy(new->data, str);
+}
+
+void __lb_delete_addr(list *node) {
+	if (node->data)
+		free(node->data);
+	node->data = NULL;
+}
+
+void lb_expand_block(list *node, char *addr) {
+	list *lptr = NULL, *addr_list = NULL;
+	char *lptr_data = NULL, *addr_list_data = NULL;
+	int brackets = 0;
+
+	//lptr = node->next;
+	lptr = node;
+	if (!lptr)
+		return ;
+
+	lb_eval_addr(addr, programm);
+	addr_list = target_node->next;
+	addr_list_data = addr_list->data;
+
+	while (brackets || (strcmp(addr_list_data, "]") && !brackets)) {
+		lb_insert_in_list(lptr, addr_list_data);
+
+		lptr = lptr->next;
+		addr_list = addr_list->next;
+		addr_list_data = (addr_list) ? addr_list->data : NULL;
+
+		if (!addr_list_data)
+			continue;
+	}
+}
+
+void lb_expand_addr(list *node, char *addr) {
+	char *data = NULL, *addr_copy;
+
+	// copy addr to data
+	addr_copy = pl_alloc_buf(strlen(addr) + 1);
+	strcpy(addr_copy, addr);
+
+	__lb_delete_addr(node);
+
+	data = lb_eval_addr(addr_copy, programm);
+	if (!data)
+		return ;
+	else if (!strcmp("[", data))
+		lb_expand_block(node, addr);
+	else
+		lb_insert_in_list(node, data);
 }
