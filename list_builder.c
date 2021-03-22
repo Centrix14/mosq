@@ -123,33 +123,6 @@ char *lb_eval_addr(char *addr, list *node) {
 	return NULL;
 }
 
-/*void lb_add_block(pl_state *ps) {
-	char *data = NULL, *node_buf = NULL;
-	list *lptr = NULL, *last = NULL;
-	int brackets = 0;
-
-	lptr = target_node->next;
-	data = (char*)lptr->data;
-	while (data && strcmp(data, "]")) { // data != ]
-		list_add_node(programm);
-
-		last = list_get_last(programm);
-
-		node_buf = pl_alloc_buf(strlen((char*)lptr->data) + 1);
-		strcpy(node_buf, lptr->data);
-
-		list_set_data(last, node_buf);
-		if (!strcmp(data, "["))
-			brackets++;
-		if ((strcmp(data, "[")) || (brackets > 1)) {
-			
-		} 
-
-		lptr = lptr->next;
-		data = (lptr) ? (lptr->data) : NULL;
-	}
-}*/
-
 void lb_insert_in_list(list *lptr, char *str) {
 	list *new = NULL;
 
