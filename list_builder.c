@@ -5,6 +5,7 @@
 #include "tl2/list.h"
 #include "pars.h"
 #include "list_builder.h"
+#include "interp.h"
 
 list *programm = NULL;
 list *target_node = NULL;
@@ -47,14 +48,16 @@ void lb_show_list() {
 }
 
 void lb_crawl(void (*func)(list*)) {
-	list *lptr;
+	list *lptr, *next;
 
 	lptr = programm;
 	while (lptr) {
+		next = lptr->next;
+
 		if (lptr->data)
 			(*func)(lptr);
 
-		lptr = lptr->next;
+		lptr = next;
 	}
 }
 
@@ -98,6 +101,9 @@ list *eval_addr_tok(list *node, char *tok) {
 		data = (char*)list_get_data(lptr);
 	}
 
+	if (!lptr)
+		return NULL;
+
 	if (*tok == '@')
 		return lptr->next;
 	return lptr;
@@ -137,9 +143,19 @@ void lb_insert_in_list(list *lptr, char *str) {
 }
 
 void __lb_delete_addr(list *node) {
+	list *node_prev, *node_next;
+
+	node_prev = node->prev;
+	node_next = node->next;
+
+	if (node_prev)
+		node_prev->next = node_next;
+	if (node_next)
+		node_next->prev = node_prev;
+
 	if (node->data)
 		free(node->data);
-	node->data = NULL;
+	free(node);
 }
 
 void lb_expand_block(list *node, char *addr) {
@@ -157,6 +173,11 @@ void lb_expand_block(list *node, char *addr) {
 	addr_list_data = addr_list->data;
 
 	while (brackets || (strcmp(addr_list_data, "]") && !brackets)) {
+		if (!strcmp(addr_list_data, "["))
+			brackets++;
+		else if (!strcmp(addr_list_data, "]"))
+			brackets--;
+
 		lb_insert_in_list(lptr, addr_list_data);
 
 		lptr = lptr->next;
@@ -175,13 +196,41 @@ void lb_expand_addr(list *node, char *addr) {
 	addr_copy = pl_alloc_buf(strlen(addr) + 1);
 	strcpy(addr_copy, addr);
 
-	__lb_delete_addr(node);
-
 	data = lb_eval_addr(addr_copy, programm);
 	if (!data)
 		return ;
-	else if (!strcmp("[", data))
-		lb_expand_block(node, addr);
+	else if (!strcmp(data, "["))
+		lb_eval_block(target_node);
 	else
 		lb_insert_in_list(node, data);
+	
+	__lb_delete_addr(node);
+}
+
+void lb_eval_block(list *lptr) {
+	list *node = NULL, *next = NULL;
+	int brackets = 1;
+
+	if (!lptr->next)
+		return;
+
+	node = lptr->next;
+	while (node) {
+		next = node->next;
+
+		if (!node->data)
+			break;
+
+		if (!strcmp(node->data, "["))
+			brackets++;
+		else if (!strcmp(node->data, "]")) {
+			brackets--;
+
+			if (!brackets)
+				break;
+		}
+
+		il_eval(node);
+		node = next;
+	}
 }
