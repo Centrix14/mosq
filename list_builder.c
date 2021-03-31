@@ -158,37 +158,6 @@ void __lb_delete_addr(list *node) {
 	free(node);
 }
 
-void lb_expand_block(list *node, char *addr) {
-	list *lptr = NULL, *addr_list = NULL;
-	char *lptr_data = NULL, *addr_list_data = NULL;
-	int brackets = 0;
-
-	//lptr = node->next;
-	lptr = node;
-	if (!lptr)
-		return ;
-
-	lb_eval_addr(addr, programm);
-	addr_list = target_node->next;
-	addr_list_data = addr_list->data;
-
-	while (brackets || (strcmp(addr_list_data, "]") && !brackets)) {
-		if (!strcmp(addr_list_data, "["))
-			brackets++;
-		else if (!strcmp(addr_list_data, "]"))
-			brackets--;
-
-		lb_insert_in_list(lptr, addr_list_data);
-
-		lptr = lptr->next;
-		addr_list = addr_list->next;
-		addr_list_data = (addr_list) ? addr_list->data : NULL;
-
-		if (!addr_list_data)
-			continue;
-	}
-}
-
 void lb_expand_addr(list *node, char *addr) {
 	char *data = NULL, *addr_copy;
 
