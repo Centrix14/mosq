@@ -82,7 +82,7 @@ void __il_print_list(list *node) {
 		else if (__il_is_esc_seq(str) > -1)
 			__il_print_esc(str);
 		else
-			printf("%s ", str);
+			printf("%s", str);
 
 		lptr = lptr->next;
 	}
