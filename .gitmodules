@@ -1,0 +1,6 @@
+[submodule "st.h"]
+	path = st.h
+	url = https://github.com/Centrix14/st.h.git
+[submodule "tl2"]
+	path = tl2
+	url = https://github.com/Centrix14/tl2.git
