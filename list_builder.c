@@ -2,10 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "st.h/st.h"
 #include "tl2/list.h"
 #include "pars.h"
 #include "list_builder.h"
 #include "interp.h"
+#include "token.h"
 
 list *programm = NULL;
 list *target_node = NULL;
@@ -19,29 +21,35 @@ void lb_free() {
 }
 
 void lb_add_token(pl_state *ps) {
-	char *node_buf, *data;
+	char *data;
 	list *last;
+	token *tok;
 
 	data = ps->buffer;
 	list_add_node(programm);
 
 	last = list_get_last(programm);
 	
-	node_buf = pl_alloc_buf(strlen(data) + 1);
-	strcpy(node_buf, data);
+	tok = tl_alloc(data);
+	if (!tok) {
+		st_err("fail to allocate memory");
+	}
 
-	list_set_data(last, node_buf);
+	list_set_data(last, tok);
 }
 
 void lb_show_list() {
+	token *tok;
 	list *lptr;
 	int i = 0;
 
 	lptr = programm;
 	while (lptr) {
-		if (lptr->data)
-			//printf("[%3d]: %s\n", i++, (char*)lptr->data);
-			printf("%s ", (char*)lptr->data);
+		if (lptr->data) {
+			tok = (token*)lptr->data;
+			printf("[%3d]: val=%s\tret=%s\n", i++, (char*)tok->val, (char*)tok->ret);
+			//printf("%s ", (char*)tok->val);
+		}
 
 		lptr = lptr->next;
 	}
@@ -85,20 +93,24 @@ list *__list_get_first(list *node) {
 list *eval_addr_tok(list *node, char *tok) {
 	char *data = NULL, *addr = NULL;
 	list *lptr = NULL;
+	token *tk = NULL;
 
 	addr = tok;
 	if (*tok == '@')
 		addr = &tok[1];
 
 	lptr = node;
-	data = (char*)list_get_data(lptr);
+	tk = (token*)lptr->data;
+	data = tk->val;
+
 	while (lptr) {
 		if (data && !strcmp(addr, data)) // tok == data
 			break;
 
 		lptr = lptr->next;
 
-		data = (char*)list_get_data(lptr);
+		tk = (token*)lptr->data;
+		data = tk->val;
 	}
 
 	if (!lptr)
@@ -112,6 +124,7 @@ list *eval_addr_tok(list *node, char *tok) {
 char *lb_eval_addr(char *addr, list *node) {
 	char *tok = NULL;
 	list *lptr = NULL;
+	token *tk = NULL;
 
 	lptr = node->next;
 	tok = strtok(addr, ":");
@@ -124,13 +137,15 @@ char *lb_eval_addr(char *addr, list *node) {
 	if (lptr && lptr->data) {
 		target_node = lptr;
 
-		return lptr->data;
+		tk = (token*)lptr->data;
+		return tk->ret;
 	}
 	return NULL;
 }
 
 void lb_insert_in_list(list *lptr, char *str) {
 	list *new = NULL;
+	token *tok = NULL;
 
 	new = list_init_node(lptr);
 	
@@ -138,8 +153,8 @@ void lb_insert_in_list(list *lptr, char *str) {
 	lptr->next = new;
 	lptr->next->prev = new;
 
-	new->data = malloc(strlen(str) + 1);
-	strcpy(new->data, str);
+	tok = tl_alloc(str);
+	new->data = tok;
 }
 
 void __lb_delete_addr(list *node) {
@@ -178,21 +193,28 @@ void lb_expand_addr(list *node, char *addr) {
 
 void lb_eval_block(list *lptr) {
 	list *node = NULL, *next = NULL;
+	token *tok = NULL;
+	char *data = NULL;
 	int brackets = 1;
 
 	if (!lptr->next)
 		return;
 
 	node = lptr->next;
+	if (!node->data)
+		return ;
+
+	tok = (token*)node->data;
+	data = (char*)tok->val;
 	while (node) {
 		next = node->next;
 
-		if (!node->data)
+		if (!data)
 			break;
 
-		if (!strcmp(node->data, "["))
+		if (!strcmp(data, "["))
 			brackets++;
-		else if (!strcmp(node->data, "]")) {
+		else if (!strcmp(data, "]")) {
 			brackets--;
 
 			if (!brackets)
@@ -200,6 +222,9 @@ void lb_eval_block(list *lptr) {
 		}
 
 		il_eval(node);
+
 		node = next;
+		tok = (token*)node->data;
+		data = (char*)tok->val;
 	}
 }
