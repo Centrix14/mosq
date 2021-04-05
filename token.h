@@ -13,4 +13,6 @@ void tl_free_list(list *node);
 
 token *tl_alloc(char *buf);
 
+void tl_set_ret(token *tok, char *buf);
+
 #endif

@@ -8,7 +8,7 @@ void lb_init();
 void lb_free();
 
 void lb_add_token(pl_state *ps);
-void lb_insert_in_list(list *lptr, char *str);
+void lb_insert_in_list(list *lptr, char *val, char *ret);
 
 void lb_show_list();
 void lb_print_node(list *node);
