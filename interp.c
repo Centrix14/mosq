@@ -4,26 +4,31 @@
 #include "tl2/list.h"
 #include "list_builder.h"
 #include "interp.h"
+#include "token.h"
 
-char *std_func_list[] = {"print", "help", "reval", NULL};
-void (*std_cb_list[])(list*) = {il_cb_print, il_cb_help, il_cb_reval};
+char *std_func_list[] = {"print", "help", "reval", "input", NULL};
+void (*std_cb_list[])(list*) = {il_cb_print, il_cb_help, il_cb_reval, il_cb_input};
 
 void il_eval(list *node) {
 	static int is_block = 0; 
+	token *tk = NULL;
 	char *data;
 
-	data = (char*)node->data;
+	tk = (token*)node->data;
+	data = (char*)tk->val;
+	is_block += il_is_block(data);
+
 	if (lb_is_addr_expr(data))
 		lb_expand_addr(node, data);
-	else if (il_is_block(data))
-		is_block = !is_block;
 	else if (!is_block)
 		il_eval_as_func(data, node);
 }
 
 int il_is_block(char *tok) {
-	if (strstr("[]", tok))
+	if (*tok == '[')
 		return 1;
+	else if (*tok == ']')
+		return -1;
 	return 0;
 }
 
@@ -46,6 +51,16 @@ void il_run(int code, list *node) {
 	(*std_cb_list[code])(node);
 }
 
+void il_expand(list *node) {
+	char *data = NULL;
+	token *tok = NULL;
+
+	tok = (token*)node->data;
+	data = (char*)tok->val;
+	if (lb_is_addr_expr(data))
+		lb_expand_addr(node, data);
+}
+
 int __il_is_esc_seq(char *str) {
 	char *esc[] = {".n", ".t", ".p", NULL};
 
@@ -65,6 +80,7 @@ void __il_print_esc(char *str) {
 }
 
 void __il_print_list(list *node) {
+	token *tok;
 	list *lptr;
 	char *str;
 
@@ -76,7 +92,8 @@ void __il_print_list(list *node) {
 			continue;
 		}
 
-		str = (char*)lptr->data;
+		tok = (token*)lptr->data;
+		str = (char*)tok->ret;
 		if (!strcmp(str, "]")) // str == "]"
 			return ;
 		else if (__il_is_esc_seq(str) > -1)
@@ -89,12 +106,16 @@ void __il_print_list(list *node) {
 }
 
 void il_cb_print(list *node) {
+	token *tok;
 	list *arg;
 	char *str;
 
 	arg = node->next;
-	if (arg && arg->data)
-		str = (char*)arg->data;
+	if (!arg || !arg->data)
+		return ;
+
+	tok = (token*)arg->data;
+	str = (char*)tok->ret;
 
 	if (strcmp(str, "[")) { // str != [
 		if (__il_is_esc_seq(str) > -1)
@@ -112,4 +133,12 @@ void il_cb_help(list *node) {
 
 void il_cb_reval(list *node) {
 	lb_crawl(il_eval);
+}
+
+void il_cb_input(list *node) {
+	char buf[256] = "";
+
+	fgets(buf, 256, stdin);
+	if (strlen(buf) > 0)
+		lb_insert_in_list(node, buf);
 }
