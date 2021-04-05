@@ -143,7 +143,7 @@ char *lb_eval_addr(char *addr, list *node) {
 	return NULL;
 }
 
-void lb_insert_in_list(list *lptr, char *str) {
+void lb_insert_in_list(list *lptr, char *val, char *ret) {
 	list *new = NULL;
 	token *tok = NULL;
 
@@ -153,7 +153,8 @@ void lb_insert_in_list(list *lptr, char *str) {
 	lptr->next = new;
 	lptr->next->prev = new;
 
-	tok = tl_alloc(str);
+	tok = tl_alloc(val);
+	tl_set_ret(tok, ret);
 	new->data = tok;
 }
 
