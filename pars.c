@@ -7,12 +7,14 @@
 #include "pars.h"
 #include "list_builder.h"
 #include "interp.h"
+#include "token.h"
 
 int main() {
 	lb_init();
 
 	pl_open_file("code.msq");
 
+	lb_crawl(tl_free_list);
 	lb_free();
 	return 0;
 }
@@ -96,6 +98,7 @@ void pl_check_delimetrs(pl_state *ps) {
 
 		pl_add_token(ps);
 
+		lb_crawl(il_expand);
 		lb_crawl(il_eval);
 		//lb_show_list();
 		lb_free();
